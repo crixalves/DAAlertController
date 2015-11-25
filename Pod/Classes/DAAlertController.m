@@ -44,6 +44,18 @@
     }
 }
 
++ (void)showAlertOfStyle:(DAAlertControllerStyle)style inViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions timeout:(int64_t) timeout {
+    
+    switch (style) {
+        case DAAlertControllerStyleAlert: {
+            [self showAlertViewInViewController:viewController withTitle:title message:message actions:actions timeout:timeout];
+        } break;
+        case DAAlertControllerStyleActionSheet: {
+            [self showActionSheetInViewController:viewController fromSourceView:viewController.view withTitle:title message:message actions:actions permittedArrowDirections:0];
+        } break;
+    }
+}
+
 + (void)showActionSheetInViewController:(UIViewController *)viewController fromSourceView:(UIView *)sourceView withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions permittedArrowDirections:(UIPopoverArrowDirection)permittedArrowDirections {
     
     if (NSStringFromClass([UIAlertController class])) {
@@ -96,7 +108,13 @@
         [self validateActions:actions];
         UIActionSheet *actionSheet = [self actionSheetWithTitle:title message:message actions:actions];
         [actionSheet showFromBarButtonItem:barButtonItem animated:YES];
+        
     }
+}
+
++ (void)showAlertViewInViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions timeout:(int64_t) timeout{
+    
+    [self showAlertViewInViewController:viewController withTitle:title message:message actions:actions timeout:timeout numberOfTextFields:0 textFieldsConfigurationHandler:nil validationBlock:nil];
 }
 
 + (void)showAlertViewInViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions {
@@ -105,6 +123,11 @@
 }
 
 + (void)showAlertViewInViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions numberOfTextFields:(NSUInteger)numberOfTextFields textFieldsConfigurationHandler:(void (^)(NSArray *textFields))configurationHandler validationBlock:(BOOL (^)(NSArray *textFields))validationBlock {
+    
+    [self showAlertViewInViewController:viewController withTitle:title message:message actions:actions timeout:0 numberOfTextFields:numberOfTextFields textFieldsConfigurationHandler:configurationHandler validationBlock:validationBlock];
+}
+
++ (void)showAlertViewInViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions timeout:(int64_t) timeout numberOfTextFields:(NSUInteger)numberOfTextFields textFieldsConfigurationHandler:(void (^)(NSArray *textFields))configurationHandler validationBlock:(BOOL (^)(NSArray *textFields))validationBlock {
     
     if (NSStringFromClass([UIAlertController class])) {
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
@@ -156,6 +179,15 @@
             }
         }
         [viewController presentViewController:alertController animated:YES completion:nil];
+        if(timeout > 0) {
+            
+            int64_t delayInSeconds = timeout;
+            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+            dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                [alertController dismissViewControllerAnimated:true completion:nil];
+            });
+            
+        }
     } else {
         NSAssert(numberOfTextFields <= 2, @"DAAlertController can only have up to 2 textfields on iOS 7");
         UIAlertView *alertView = [self alertViewWithTitle:title message:message actions:actions];
@@ -180,6 +212,14 @@
             }
         }
         [alertView show];
+        if(timeout > 0) {
+            
+            int64_t delayInSeconds = timeout;
+            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+            dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                [alertView dismissWithClickedButtonIndex:0 animated:true];
+            });
+        }
     }
 }
 
