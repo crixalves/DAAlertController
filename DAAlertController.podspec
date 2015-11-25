@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.homepage         = "https://github.com/daria-kopaliani/DAAlertController"
   s.license          = 'MIT'
   s.author           = { "Daria Kopaliani" => "daria.kopaliani@gmail.com" }
-  s.source           = { :git => "https://github.com/daria-kopaliani/DAAlertController.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/crixalves/DAAlertController.git", :tag => s.version.to_s }
 
   s.platform     = :ios, '7.0'
   s.requires_arc = true
