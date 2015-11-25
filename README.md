@@ -38,7 +38,8 @@ Let’s take a look at the case of a simple alert view:
     [DAAlertController showAlertViewInViewController:self
                                            withTitle:@"Are you sure you want to sign out?"
                                              message:@"If you sign out of your account all photos will be removed from this iphone."
-                                             actions:@[cancelAction, signOutAction], timeout:10];                                        
+                                             actions:@[cancelAction, signOutAction],
+                                             timeout:10];                                        
 
 Here is what you will get for iOS 8 and 7: (`UIAlertView` does not support destructive buttons so "Sign out" button will be rendered as a default button)
 
@@ -86,7 +87,6 @@ DAAlertController is available through [CocoaPods](http://cocoapods.org). To ins
 it, simply add the following line to your Podfile:
 
     pod 'DAAlertController’, :git => 'https://github.com/crixalves/DAAlertController.git'
-pod 'MagicalRecord/Shorthand'
 
 ## License
 
