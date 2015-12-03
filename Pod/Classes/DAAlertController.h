@@ -18,6 +18,9 @@ typedef NS_ENUM(NSInteger, DAAlertControllerStyle) {
 
 @interface DAAlertController : NSObject
 
++ (NSString*) alertViewWillCloseNotification;
++ (NSString*) alertViewWillOpenNotification;
+
 + (void)showAlertOfStyle:(DAAlertControllerStyle)style inViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions;
 + (void)showAlertOfStyle:(DAAlertControllerStyle)style inViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions timeout:(int64_t) timeout;
 

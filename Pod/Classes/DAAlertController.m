@@ -32,6 +32,16 @@
     return alertController;
 }
 
++ (NSString*) alertViewWillCloseNotification {
+    
+    return @"willCloseAlertView";
+}
+
++ (NSString*) alertViewWillOpenNotification {
+    
+    return @"willOpenAlertView";
+}
+
 + (void)showAlertOfStyle:(DAAlertControllerStyle)style inViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions {
     
     switch (style) {
@@ -129,6 +139,9 @@
 
 + (void)showAlertViewInViewController:(UIViewController *)viewController withTitle:(NSString *)title message:(NSString *)message actions:(NSArray *)actions timeout:(int64_t) timeout numberOfTextFields:(NSUInteger)numberOfTextFields textFieldsConfigurationHandler:(void (^)(NSArray *textFields))configurationHandler validationBlock:(BOOL (^)(NSArray *textFields))validationBlock {
     
+    [[NSNotificationCenter defaultCenter] postNotificationName: [self alertViewWillOpenNotification] object:nil];
+    
+    __block bool close = false;
     if (NSStringFromClass([UIAlertController class])) {
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
         NSMutableSet *disableableActions = [NSMutableSet set];
@@ -141,9 +154,14 @@
                     }
                     observers = nil;
                 }
+                
+                close = true;
+                
                 if (action.handler) {
                     action.handler();
                 }
+                [[NSNotificationCenter defaultCenter] postNotificationName: [self alertViewWillCloseNotification] object:nil];
+                
             }];
             if (validationBlock) {
                 if (action.style != UIAlertActionStyleCancel) {
@@ -184,7 +202,12 @@
             int64_t delayInSeconds = timeout;
             dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
             dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                
                 [alertController dismissViewControllerAnimated:true completion:nil];
+                if(!close) {
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName: self.alertViewWillCloseNotification object:nil];
+                }
             });
             
         }
@@ -218,6 +241,9 @@
             dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
             dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
                 [alertView dismissWithClickedButtonIndex:0 animated:true];
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName: self.alertViewWillCloseNotification object:nil];
+                
             });
         }
     }
@@ -346,6 +372,8 @@
 }
 
 + (void)handleActionSelection:(DAAlertAction *)action {
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName: self.alertViewWillCloseNotification object:nil];
     
     if (action.handler) {
         action.handler();
